@@ -1,7 +1,11 @@
 require 'digest/md5'
 
-unless defined?(::Rails.cache) || ::Rails.cache.class.is_a?(ActiveSupport::Cache::MemCacheStore)
-  warning = "[Query memcached WARNING] ::Rails.cache is not defined or cache engine is not mem_cache_store"
+def query_memcached_useable?
+  defined?(::Rails.cache) || ( !::Rails.cache.instance_methods.include?( 'stats' ) )
+end
+
+unless query_memcached_useable?
+  warning = "[Query memcached WARNING] ::Rails.cache is not defined or cache engine is not backed by Memcached."
   ActiveRecord::Base.logger.error warning
   raise warning
 end 
