@@ -112,7 +112,7 @@ module ActiveRecord
 
       # Enable the query cache within the block
       def cache
-        old, query_cache_enabled = query_cache_enabled, true
+        old, self.query_cache_enabled = query_cache_enabled, true
         self.query_cache ||= {}
         @cache_version ||= {}
         yield
