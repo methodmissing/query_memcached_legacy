@@ -34,20 +34,23 @@ module ActiveRecord
       # Increment the class version key number
       def increase_version!(table_name = nil)
         key = cache_version_key(table_name) 
-        if r = ::Rails.cache.read(key).to_i
+        if r = ::Rails.cache.read(key)
           # FIXME: not very elegant
-          ::Rails.cache.write(key, r + (1 % 10000000) )
+          ::Rails.cache.write(key, r.to_i + 1 )
         else
           ::Rails.cache.write(key,1)
         end
       end
 
+      # Given a sql query this method extract all the table names of the database affected by the query
+      # thanks to the regular expression we have generated on the load of the plugin
+      def extract_table_names(sql)
+        sql.gsub(/`/,'').scan(ActiveRecord::Base.table_names).map{ |t| t.strip}.uniq
+      end
     end    
 
   end  
-end
 
-module ActiveRecord
   module ConnectionAdapters # :nodoc:
     
     # Only prepared for MySQL adapter
@@ -57,7 +60,7 @@ module ActiveRecord
       def execute_with_clean_query_cache(*args)
         sql = args[0].strip
         if sql =~ /^(INSERT|UPDATE|ALTER|DROP|DELETE)/i
-          extract_table_names(sql).each do |table_name|        
+          ActiveRecord::Base.extract_table_names(sql).each do |table_name|       
             ActiveRecord::Base.increase_version!(table_name)
           end
         end
@@ -212,13 +215,8 @@ module ActiveRecord
             0
           end
         end
-
-        # Given a sql query this method extract all the table names of the database affected by the query
-        # thanks to the regular expression we have generated on the load of the plugin
-        def extract_table_names(sql)
-          sql.gsub(/`/,'').scan(ActiveRecord::Base.table_names).map{ |t| t.strip}.uniq
-        end
-
+        
+      end
     end
   end
 end
