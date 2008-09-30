@@ -191,7 +191,7 @@ module ActiveRecord
         
         # Transforms a sql query into a valid key for Memcache
         def query_key(sql)
-          table_names = extract_table_names(sql)
+          table_names = ActiveRecord::Base.extract_table_names(sql)
           # version_number is the sum of the global version number and all the version number of each table
           version_number = get_cache_version
           table_names.each { |table_name| version_number += get_cache_version(table_name) }
@@ -216,7 +216,6 @@ module ActiveRecord
           end
         end
         
-      #end
     end
   end
 end
