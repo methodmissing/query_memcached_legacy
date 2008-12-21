@@ -1,1 +1,6 @@
+<<<<<<< HEAD:.gitignore
 .DS_Store
+=======
+test/testing_app/log/
+.svn
+>>>>>>> 98bcb866a59855bf54fa38f6a282559a10911997:.gitignore
